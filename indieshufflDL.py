@@ -32,6 +32,7 @@ def dumpIt(entry):
     for chunk in r.iter_content(1024):
         f.write(chunk)
     f.truncate()
+    f.close()
 
     #write id3 tags
 
