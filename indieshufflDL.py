@@ -10,7 +10,7 @@ import os.path
 #get latest trackid to get the playlist and dump music from this playlist
 dom=html.fromstring(requests.get('http://www.indieshuffle.com/new-songs/').text)
 mId=dom.xpath('//div[@class="cover col-4"]/div[2]/@data-track-id')[0]
-mCount=100
+mCount=2000
 url="http://www.indieshuffle.com/mobile/player?id={}&key=04ffdb11a4c54c729c743eccc46da873&count={}&page=1&type=newest&sort=order".format(mId,mCount)
 print ("start downloading from: {}\n initial track id: {}\n count: {}".format(url,mId,mCount))
 resp=requests.get(url)
@@ -22,12 +22,13 @@ def dumpIt(entry):
         return
     #filename ='{}.mp3'.format(entry['slug'].encode('utf8'))
     filename ='{}.mp3'.format(entry['slug'])
-    localSize=os.path.getsize(filename)
+    localSize=os.path.getsize(filename) if os.path.isfile(filename) else 0
     remoteSize=int(r.headers['Content-Length'])
-    print ("filename:{} local size:{} remote size:{}".format(filename,localSize,remoteSize))
-    if os.path.isfile(filename) and remoteSize < localSize:
+    if remoteSize < localSize:
+        print ("[skip] filename:{}, local size:{}, remote size:{}".format(filename,localSize,remoteSize))
         return
     f = open(filename, 'wb')
+    print ("[downloading] filename:{}, local size:{}, remote size:{}".format(filename,localSize,remoteSize))
     for chunk in r.iter_content(1024):
         f.write(chunk)
     f.truncate()
